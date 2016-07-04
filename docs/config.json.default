@@ -1,0 +1,5 @@
+{
+    "serverIpAddress": "127.0.0.1",
+    "serverPort": 10000,
+    "enableLog": "true"
+}
