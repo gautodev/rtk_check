@@ -11,20 +11,23 @@ from rtk_check import log
 
 def try_parse(data):
     """从头开始，逐字节尝试解析
+
     Returns:
         index: 尝试到的位置
         len_message: 报文总长度，-1表示没有完整报文
+        msg_type: 报文类型
     """
     for i in range(0, len(data) - 1):
         len_message = try_parse_from_begin(data[i:])
         if len_message > 0 and i + len_message <= len(data):
-            return i, len_message
-    return len(data), -1
+            msg_type = get_msg_type(data[i+3:])
+            return i, len_message, msg_type
+    return len(data), -1, -1
 
 
 def try_parse_from_begin(data):
     # 检查引导字和保留字
-    if data[0] != 0xd3 or data[1] & 0b11111100 != 0x0:
+    if (len(data) < 3) or (data[0] != 0xd3) or (data[1] & 0b11111100 != 0x0):
         return -1
 
     # 报文长度
@@ -41,6 +44,7 @@ def try_parse_from_begin(data):
     if crc != crc_from_message:
         log.warning('crc check failed.')
         return -1
+
     return len_full_message
 
 
@@ -74,3 +78,16 @@ def get_crc(msg, div='1100001100100110011111011', code='0'*24):
 
     # Output the last error-checking code portion of the message generated
     return ''.join(msg[-len(code):])
+
+
+def get_msg_type(msg):
+    """判断报文类型
+
+    Args:
+        msg: 待解析消息
+
+    Returns:
+        msg_type: 消息类型
+    """
+    msg_type = (msg[0] << 4) + ((msg[1] & 0xF0) >> 4)
+    return msg_type

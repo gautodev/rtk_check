@@ -33,14 +33,14 @@ class Checker(threading.Thread):
         try:
             data = self.data.copy()
         except Exception as e:
-            log.error('checker thread error when copy data: %s' % e)
+            log.error('checker error when copy data: %s' % e)
         self.lock.release()
         if data is None:
             return
 
         try:
             # 解析
-            index, len_message = try_parse(data)
+            index, len_message, msg_type = try_parse(data)
             # 删除解析后的数据
             if len_message > 0:
                 if index > 0:
@@ -48,13 +48,13 @@ class Checker(threading.Thread):
                     # print unknown data
                     #print([hex(x) for x in data[:index]])
                     #print(bytes(data[:index]).decode('utf-8', errors='ignore'))
-                log.info('pkg size: %d' % len_message)
+                log.info('pkg size: %d, msg size: %d, msg type: %d' % (len_message, len_message-6, msg_type))
                 #print([hex(x) for x in data[:index + len_message]])
                 #print(bytes(data[:index + len_message]).decode('utf-8', errors='ignore'))
                 self.remove_from_data(index + len_message)
                 return True
         except Exception as e:
-            log.error('checker thread error when parse msg: %s' % e)
+            log.error('checker error when parse msg: %s' % e)
         return False
 
     def add_data(self, data):
@@ -67,7 +67,7 @@ class Checker(threading.Thread):
         try:
             self.data.extend(data)
         except Exception as e:
-            log.error('checker thread error when add: %s' % e)
+            log.error('checker error when add: %s' % e)
         self.lock.release()
         # 收到后开始解析，直到解析不出报文
         while self.parse_data():
@@ -86,5 +86,5 @@ class Checker(threading.Thread):
             else:
                 self.data = []
         except Exception as e:
-            log.error('checker thread error when remove data: %s' % e)
+            log.error('checker error when remove data: %s' % e)
         self.lock.release()
