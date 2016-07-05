@@ -14,7 +14,7 @@ def try_parse(data):
 
     Returns:
         index: 尝试到的位置
-        len_message: 报文总长度，-1表示没有完整报文
+        len_message: 报文总长度，-1表示没有报文，-2表示报文未完
         msg_type: 报文类型
     """
     for i in range(0, len(data) - 1):
@@ -22,10 +22,20 @@ def try_parse(data):
         if len_message > 0 and i + len_message <= len(data):
             msg_type = get_msg_type(data[i+3:])
             return i, len_message, msg_type
+        if len_message == -2:   # 报文未完，不能删除
+            return 0, len_message, -1
     return len(data), -1, -1
 
 
 def try_parse_from_begin(data):
+    """从 data 首字节开始解析
+
+    Returns:
+        正整数: 报文长度
+        -1: 无效
+        -2: 报文不完整
+    """
+
     # 检查引导字和保留字
     if (len(data) < 3) or (data[0] != 0xd3) or (data[1] & 0b11111100 != 0x0):
         return -1
@@ -33,8 +43,10 @@ def try_parse_from_begin(data):
     # 报文长度
     len_rtcm = (data[1] & 0b11) * 0x100 + data[2]
     len_full_message = len_rtcm + 3 + 3     # 加上引导字、保留字、校验
-    if len_rtcm <= 0 or len_full_message > len(data):
+    if len_rtcm <= 0:
         return -1
+    elif len_full_message > len(data):
+        return -2
 
     # 校验
     message = data[0:3+len_rtcm]

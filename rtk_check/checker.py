@@ -41,17 +41,18 @@ class Checker(threading.Thread):
         try:
             # 解析
             index, len_message, msg_type = try_parse(data)
+            if index > 0:
+                log.info('unknown data size: %d' % index)
+                # print unknown data
+                #print([hex(x) for x in data[:index]])
+                #print(bytes(data[:index]).decode('utf-8', errors='ignore'))
+                self.remove_from_data(index)
             # 删除解析后的数据
             if len_message > 0:
-                if index > 0:
-                    log.info('unknown data size: %d' % index)
-                    # print unknown data
-                    #print([hex(x) for x in data[:index]])
-                    #print(bytes(data[:index]).decode('utf-8', errors='ignore'))
                 log.info('pkg size: %d, msg size: %d, msg type: %d' % (len_message, len_message-6, msg_type))
                 #print([hex(x) for x in data[:index + len_message]])
                 #print(bytes(data[:index + len_message]).decode('utf-8', errors='ignore'))
-                self.remove_from_data(index + len_message)
+                self.remove_from_data(len_message)
                 return True
         except Exception as e:
             log.error('checker error when parse msg: %s' % e)
