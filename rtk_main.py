@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-# File          : rtk_check.py
+# File          : rtk_main.py
 # Author        : bssthu
 # Project       : rtk_check
 # Description   : 检查 rtk 数据

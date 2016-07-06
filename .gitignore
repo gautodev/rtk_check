@@ -59,5 +59,4 @@ target/
 .idea/
 
 *.json
-*.log
 
