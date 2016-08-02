@@ -37,7 +37,7 @@ class ClientThread(threading.Thread):
 
         循环运行，建立连接、接收数据，并在连接出错时重连。
         """
-        log.info('client thread: start')
+        log.info('client thread: start, %s:%d' % (self.server_ip, self.server_port))
         while self.running:
             try:
                 self.receive_data()
